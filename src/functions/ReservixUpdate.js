@@ -3,10 +3,23 @@ const { main } = require('./getReservix');
 const dotenv = require('dotenv');
 dotenv.config();
 
-app.timer('ReservixUpdate', {
+async function handle(req, context) {
+    await context.log('Timer function started.');
+    await main();
+
+    return {
+        status: 200,
+    };
+}
+
+app.timer('ReservixUpdateTimer', {
     schedule: process.env.AZURE_CRON_TIMER,
-    handler: (myTimer, context) => async () => {
-        context.log('Timer function started.');
-        await main()
-    }
+    handler: handle
 });
+
+app.http('ReservixUpdateHttp', {
+    route: "trigger",
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    handler: handle
+})
