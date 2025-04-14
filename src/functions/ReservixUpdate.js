@@ -3,7 +3,18 @@ const { main } = require('./getReservix');
 const dotenv = require('dotenv');
 dotenv.config();
 
+let isRunning = false; // In-memory Lock
+
 async function handle(req, context) {
+    if (isRunning) {
+        context.log('Function is already running. Skipping execution.');
+        return {
+            status: 429, // Too Many Requests
+            body: "Function is already running. Please try again later."
+        };
+    }
+
+    isRunning = true; // Set lock
     try {
         context.log('Reservix Update wurde gestartet');
         await main();
@@ -14,10 +25,10 @@ async function handle(req, context) {
         };
     } catch (err) {
         context.error(err);
-        // This rethrown exception will only fail the individual invocation, instead of crashing the whole process
         throw err;
+    } finally {
+        isRunning = false; // Release lock
     }
-
 }
 
 app.timer('ReservixUpdateTimer', {

@@ -15,6 +15,9 @@ const client = wrapper(axios.create({
 
 async function getSessionToken() {
     try {
+        // CookieJar aufraeumen
+        await jar.removeAllCookies();
+
         const loginPageResponse = await client.get("https://system.reservix.de/rx/auth/login");
 
         // Manually add cookies from the response to the CookieJar
@@ -40,7 +43,7 @@ async function getSessionToken() {
         });
 
         const phpSessionIDMatch = loginResponse.request.res.responseUrl.match(/https:\/\/system\.reservix\.de\/rx\/home\?PHPSESSID=(.+)/);
-        const orgaResponse = await client.get("https://system.reservix.de/rx/home/organizations/employee/" + process.env.RESERVIX_EMPLOYEE_ID +"?PHPSESSID=" + phpSessionIDMatch[1]);
+        const orgaResponse = await client.get("https://system.reservix.de/rx/home/organizations/employee/" + process.env.RESERVIX_EMPLOYEE_ID + "?PHPSESSID=" + phpSessionIDMatch[1]);
 
         const statistikUrl = ("https://system.reservix.de" + orgaResponse.data.result.match(/href="(\/off\/login_check\.php\?target=[\S]+)"/)[1]).replace(/&amp;/g, "&")
         const statistikResponse = await client.get(statistikUrl, {

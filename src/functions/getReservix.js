@@ -37,8 +37,8 @@ async function getVeranstaltungen(eventGrpId, phpSessionId, cookie) {
             // Extract all matches for the regex
             const regex = /<tr class="rxrow">\s*<td nowrap="nowrap">.{2}, (\d{2}).(\d{2}).(20\d{2})<\/td>\s*<td nowrap="nowrap">(\d{2}):(\d{2}) Uhr<\/td>\s*<td nowrap="nowrap"><a href="javascript:openDetail\('\d+',0\);" title=".*"><strong>.*<\/strong><\/a> \((\d*)\)<\/td>\s*<td style="text-align:right" nowrap="nowrap">(\d+)<\/td>\s*<td style="text-align:right" nowrap="nowrap">(\d+)<\/td>\s*<td style="text-align:right" nowrap="nowrap">(\d+)<\/td>/g;
             const matches = [...decodedString.matchAll(regex)].map(match => {
-                for(let i = 0; i < 10; i++){
-                    if(!match[i]){
+                for (let i = 0; i < 10; i++) {
+                    if (!match[i]) {
                         throw new Error(`Notwendiger Match ${i} nicht gefunden`)
                     }
                 }
@@ -89,8 +89,8 @@ async function getTickets(eventGrpId, eventId, phpSessionId, cookie) {
                         }
                     });
                     filteredRow["eventGrpId"] = eventGrpId
-                    filteredRow["Kaufdatum"] = row["Datum"].substring(6,10) + "-" + row["Datum"].substring(3,5) + "-" + row["Datum"].substring(0,2) + "T" + row["Uhrzeit"]
-                    if(filteredRow["Preis"]){
+                    filteredRow["Kaufdatum"] = row["Datum"].substring(6, 10) + "-" + row["Datum"].substring(3, 5) + "-" + row["Datum"].substring(0, 2) + "T" + row["Uhrzeit"]
+                    if (filteredRow["Preis"]) {
                         filteredRow["Preis"] = filteredRow["Preis"].replace(",", ".")
                     }
                     if (row["Block"] && row["Reihe"] && row["Platz"]) {
@@ -120,15 +120,15 @@ async function getProduktionen(phpSessionId, cookie) {
     // Loop through pages until no more matches are found
     for (var page = 1; page < 20; page++) {
         let url;
-        if(page == 1){
-            url = `https://system.reservix.de/rx/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&change=5&sortDir=DESC&pageNo=${page}`;    
+        if (page == 1) {
+            url = `https://system.reservix.de/rx/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&change=5&sortDir=DESC&pageNo=${page}`;
         } else {
             // Please dont ask
             // Reservix wechselt bei "change=5" zwischen "Zeige alle Produktionen" und "Zeige nur aktive Produktionen"
             // Default ist, dass nur die aktive Produktionen gezeigt werden
             url = `https://system.reservix.de/rx/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&sortDir=DESC&pageNo=${page}`;
         }
-        
+
         // Send a GET request to the URL
         const response = await axios.get(url, {
             responseType: 'arraybuffer',
@@ -152,8 +152,8 @@ async function getProduktionen(phpSessionId, cookie) {
         const regex = /<tr class="rxrow"><td>(\d+)<\/td><td>(.*?)<\/td><td>\s*<div class="utils-display-flex">\s*<div class="utils-display-flex-1 noLineWrap">Veranstaltung \((\d+)\)([\s\S]*?)<\/tr>/g;
         const aktivRegex = /(\d+) geöffnet/;
         const matches = [...decodedString.matchAll(regex)].map(match => {
-            for(let i = 0; i < 5; i++){
-                if(!match[i]){
+            for (let i = 0; i < 5; i++) {
+                if (!match[i]) {
                     throw new Error(`Notwendiger Match ${i} nicht gefunden`)
                 }
             }
@@ -175,7 +175,7 @@ async function getProduktionen(phpSessionId, cookie) {
 }
 
 function filterProduktionen(produktionen) {
-    if(process.env.UPDATE_ONLY_ACTIVE_PRODUKTIONEN == "true"){
+    if (process.env.UPDATE_ONLY_ACTIVE_PRODUKTIONEN == "true") {
         console.log("Filtere inaktive Produktionen")
         produktionen = produktionen.filter(produktion => produktion.Aktiv);
     }
@@ -193,7 +193,7 @@ async function main() {
     produktionen = filterProduktionen(produktionen);
     await uploadToDatabase(pool, "produktionen", produktionen);
 
-    for(const produktion of produktionen) {
+    for (const produktion of produktionen) {
         console.log(`Verarbeite Produktion ${produktion.Langname}`)
         const veranstaltungen = await getVeranstaltungen(produktion.eventGrpId, auth.phpSessionId, auth.cookie);
         await uploadToDatabase(pool, "veranstaltungen", veranstaltungen);
@@ -212,4 +212,3 @@ async function main() {
 }
 
 module.exports = { main };
-main()
