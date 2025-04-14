@@ -21,7 +21,7 @@ const config = {
 
 async function connectToDatabase() {
     console.log("Stelle Datenbankverbindung her")
-    const pool = await sql.connect(config);
+    const pool = sql.connect(config);
     console.log(`✅ Verbindung zur Datenbank hergestellt`);
     return pool;
 }
@@ -40,7 +40,7 @@ async function uploadToDatabase(pool, database, jsonArray) {
         duplikate = 0
         erfolge = 0
 
-        if(jsonArray.length == 0) {
+        if (jsonArray.length == 0) {
             console.log("✅ Keine Daten zum Einfügen")
             resolve()
             return
@@ -67,7 +67,7 @@ async function uploadToDatabase(pool, database, jsonArray) {
         }
 
         console.log(`✅ ${database} erfolgreich aktualisiert, ${erfolge} Einträge eingefügt`);
-        if(duplikate > 0){
+        if (duplikate > 0) {
             console.log(`⚠️ ${duplikate} Einträge waren schon vorhanden, übersprungen`);
         }
         resolve()

@@ -4,12 +4,20 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 async function handle(req, context) {
-    await context.log('Timer function started.');
-    await main();
+    try {
+        context.log('Reservix Update wurde gestartet');
+        await main();
 
-    return {
-        status: 200,
-    };
+        return {
+            status: 200,
+            body: "Aufruf erfolgt"
+        };
+    } catch (err) {
+        context.error(err);
+        // This rethrown exception will only fail the individual invocation, instead of crashing the whole process
+        throw err;
+    }
+
 }
 
 app.timer('ReservixUpdateTimer', {
@@ -18,8 +26,9 @@ app.timer('ReservixUpdateTimer', {
 });
 
 app.http('ReservixUpdateHttp', {
-    route: "trigger",
     methods: ['GET'],
     authLevel: 'anonymous',
     handler: handle
 })
+
+module.exports = handle
