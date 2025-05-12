@@ -121,12 +121,12 @@ async function getProduktionen(phpSessionId, cookie) {
     for (var page = 1; page < 20; page++) {
         let url;
         if (page == 1) {
-            url = `https://system.reservix.de/rx/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&change=5&sortDir=DESC&pageNo=${page}`;
+            url = `https://system.reservix.de/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&change=5&sortDir=DESC&pageNo=${page}`;
         } else {
             // Please dont ask
             // Reservix wechselt bei "change=5" zwischen "Zeige alle Produktionen" und "Zeige nur aktive Produktionen"
             // Default ist, dass nur die aktive Produktionen gezeigt werden
-            url = `https://system.reservix.de/rx/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&sortDir=DESC&pageNo=${page}`;
+            url = `https://system.reservix.de/events/overview?PHPSESSID=${phpSessionId}&sortBy=maxdatum&sortDir=DESC&pageNo=${page}`;
         }
 
         // Send a GET request to the URL

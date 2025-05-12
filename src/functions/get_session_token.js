@@ -29,6 +29,9 @@ async function getSessionToken() {
         }
 
         const loginURLMatch = loginPageResponse.data.match(/<form id="kc-form-login" onsubmit="login\.disabled = true; return true;" action="(https:\/\/b2b-auth\.reservix\.com\/auth\/realms\/b2b\/login-actions\/authenticate\?.+)" method="post">/);
+        if (loginURLMatch === null) {  
+            throw new Error(`Login URL not found in the login page response. ${loginPageResponse.data}`);
+        }
         const loginURL = loginURLMatch[1]; // Extract the first group
 
         // Eigentlicher Login
@@ -42,7 +45,10 @@ async function getSessionToken() {
             },
         });
 
-        const phpSessionIDMatch = loginResponse.request.res.responseUrl.match(/https:\/\/system\.reservix\.de\/rx\/home\?PHPSESSID=(.+)/);
+        const phpSessionIDMatch = loginResponse.request.res.responseUrl.match(/https:\/\/system\.reservix\.de(?:\/rx)?\/home\?PHPSESSID=(.+)/);
+        if(phpSessionIDMatch === null) {
+            throw new Error(`PHPSESSID not found in the response URL. ${loginResponse.request.res.responseUrl}`);
+        }
         const orgaResponse = await client.get("https://system.reservix.de/rx/home/organizations/employee/" + process.env.RESERVIX_EMPLOYEE_ID + "?PHPSESSID=" + phpSessionIDMatch[1]);
 
         const statistikUrl = ("https://system.reservix.de" + orgaResponse.data.result.match(/href="(\/off\/login_check\.php\?target=[\S]+)"/)[1]).replace(/&amp;/g, "&")
@@ -53,6 +59,9 @@ async function getSessionToken() {
         });
 
         const finalphpSessionId = statistikResponse.request.res.responseUrl.match(/PHPSESSID=(.+)/)[1]; // Extract the final URL
+        if (finalphpSessionId === null) {
+            throw new Error(`PHPSESSID not found in the final response URL. ${statistikResponse.request.res.responseUrl}`);
+        }
         const finalCookies = await jar.getCookies("https://system.reservix.de"); // Get cookies after the final redirect
         const matchingCookie = finalCookies.find(cookie => /rx-sec=.+?/.test(cookie.cookieString()));
 
