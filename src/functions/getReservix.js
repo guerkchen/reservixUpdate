@@ -113,6 +113,14 @@ async function getTickets(eventGrpId, eventId, phpSessionId, cookie) {
     }
 }
 
+function sonderfallProduktionen(produktion) {
+    if (produktion.eventGrpId == 507778) {
+        produktion.Titel = "Kleiner König Kalle Wirsch"
+    } else if (produktion.eventGrpId == 507795) {
+        produktion.Titel = "Was ihr wollt"
+    }
+}
+
 async function getProduktionen(phpSessionId, cookie) {
     console.log(`Hole Liste der Produktionen`)
 
@@ -164,6 +172,7 @@ async function getProduktionen(phpSessionId, cookie) {
                 Aktiv: aktivRegex.test(match[4]),
                 Jahr: match[4].match(/(\d{2}\.\d{2}\.20\d{2})/)[0].substring(6, 10),
             }
+            sonderfallProduktionen(produktion)
             produktion.Langname = produktion.Jahr + " " + produktion.Titel
             return produktion
         });
